@@ -1,11 +1,28 @@
 package main
 
 import (
-	"fmt"
 	"gproject/great"
 	"net/http"
 )
 
+func main() {
+	r := great.New()
+	r.GET("/", func(context *great.Context) {
+		context.HTML(http.StatusOK, "<h1>Hello Great</h1>")
+	})
+	r.GET("/hello", func(context *great.Context) {
+		context.String(http.StatusOK, "hello %s, you're at %s\n", context.Query("name"), context.Path)
+	})
+	r.GET("/login", func(context *great.Context) {
+		context.JSON(http.StatusOK, great.H{
+			"username": context.PostForm("username"),
+			"password": context.PostForm("password"),
+		})
+	})
+	r.Run(":9999")
+}
+
+/*
 func main() {
 	// 雏形代码测试
 	r := great.New()
@@ -22,3 +39,4 @@ func main() {
 	})
 	r.Run(":9999")
 }
+*/
