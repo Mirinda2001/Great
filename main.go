@@ -5,6 +5,32 @@ import (
 	"net/http"
 )
 
+// 测试动态路由
+func main() {
+	r := great.New()
+	r.GET("/", func(c *great.Context) {
+		c.HTML(http.StatusOK, "<h1>Hello Gee</h1>")
+	})
+
+	r.GET("/hello", func(c *great.Context) {
+		// expect /hello?name=geektutu
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
+	})
+
+	r.GET("/hello/:name", func(c *great.Context) {
+		// expect /hello/geektutu
+		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
+	})
+
+	r.GET("/assets/*filepath", func(c *great.Context) {
+		c.JSON(http.StatusOK, great.H{"filepath": c.Param("filepath")})
+	})
+
+	r.Run(":9999")
+}
+
+/*
+测试JSON String HTML等方法
 func main() {
 	r := great.New()
 	r.GET("/", func(context *great.Context) {
@@ -21,6 +47,7 @@ func main() {
 	})
 	r.Run(":9999")
 }
+*/
 
 /*
 func main() {

@@ -17,6 +17,14 @@ type Context struct {
 	Path   string
 	// 相应信息
 	StatusCode int
+	// 模糊匹配对应的值
+	Params map[string]string
+}
+
+// Param 获取模糊匹配对应的值
+func (c *Context) Param(key string) string {
+	value, _ := c.Params[key]
+	return value
 }
 
 func newContext(w http.ResponseWriter, req *http.Request) *Context {

@@ -42,6 +42,8 @@ func (n *node) insert(pattern string, parts []string, height int) {
 	child := n.matchChild(part)
 	if child == nil {
 		child = &node{part: part, isWild: part[0] == ':' || part[0] == '*'}
+		// 注意新建子孩子之后别忘了把他放在当前节点的children中
+		n.children = append(n.children, child)
 	}
 	child.insert(pattern, parts, height+1)
 }
