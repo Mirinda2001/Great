@@ -5,6 +5,40 @@ import (
 	"net/http"
 )
 
+//分组测试
+func main() {
+	r := great.New()
+	r.GET("/index", func(context *great.Context) {
+		context.HTML(http.StatusOK, "<h1>Hello Great</h1>")
+	})
+	v1 := r.Group("/v1")
+	{
+		v1.GET("/", func(context *great.Context) {
+			context.HTML(http.StatusOK, "<h1>Hello Great</h1>")
+		})
+		v1.GET("/hello", func(c *great.Context) {
+			// expect /hello?name=geektutu
+			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Query("name"), c.Path)
+		})
+	}
+	v2 := r.Group("/v2")
+	{
+		v2.GET("/hello/:name", func(c *great.Context) {
+			// expect /hello/geektutu
+			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
+		})
+		v2.POST("/login", func(c *great.Context) {
+			c.JSON(http.StatusOK, great.H{
+				"username": c.PostForm("username"),
+				"password": c.PostForm("password"),
+			})
+		})
+
+	}
+	r.Run(":9999")
+}
+
+/*
 // 测试动态路由
 func main() {
 	r := great.New()
@@ -28,6 +62,7 @@ func main() {
 
 	r.Run(":9999")
 }
+*/
 
 /*
 测试JSON String HTML等方法

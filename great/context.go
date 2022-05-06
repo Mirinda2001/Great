@@ -15,7 +15,7 @@ type Context struct {
 	//请求方法和路径
 	Method string
 	Path   string
-	// 相应信息
+	// 响应信息
 	StatusCode int
 	// 模糊匹配对应的值
 	Params map[string]string
