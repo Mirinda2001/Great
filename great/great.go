@@ -3,6 +3,7 @@ package great
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 // HandlerFunc 将请求和响应进行封装
@@ -12,7 +13,7 @@ type HandlerFunc func(*Context)
 type (
 	RouterGroup struct {
 		prefix      string        // 前缀
-		middlewares []HandlerFunc // 支持中间件
+		middlewares []HandlerFunc // 用来存中间件
 		parent      *RouterGroup  // 父亲
 		engine      *Engine
 	}
@@ -87,16 +88,27 @@ func (engine *Engine) Run(addr string) (err error) {
 	return http.ListenAndServe(addr, engine)
 }
 
+func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	var middlewares []HandlerFunc
+	for _, group := range engine.groups {
+		if strings.HasPrefix(req.URL.Path, group.prefix) {
+			middlewares = append(middlewares, group.middlewares...)
+		}
+	}
+	c := newContext(w, req)
+	c.handlers = middlewares
+	engine.router.handle(c)
+}
+
+/*
 // engine 需要实现ServeHTTP方法才能被当作实例作为ListenAndServe的第二个参数
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	c := newContext(w, req)
 	engine.router.handle(c)
-	/*
-		key := req.Method + "-" + req.URL.Path
-			if handler, ok := engine.router[key]; ok {
-				handler(w, req)
-			} else {
-				fmt.Fprintf(w, "404 NOT FOUND: %s", req.URL.Path)
-			}
-	*/
+}
+*/
+
+// Use 使用中间件
+func (group *RouterGroup) Use(middlewares ...HandlerFunc) {
+	group.middlewares = append(group.middlewares, middlewares...)
 }

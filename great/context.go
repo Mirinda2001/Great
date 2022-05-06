@@ -19,6 +19,15 @@ type Context struct {
 	StatusCode int
 	// 模糊匹配对应的值
 	Params map[string]string
+	// 支持中间件
+	handlers []HandlerFunc
+	// 记录执行到第几个中间件
+	index int
+}
+
+func (c *Context) Fail(code int, err string) {
+	c.index = len(c.handlers)
+	c.JSON(code, H{"message": err})
 }
 
 // Param 获取模糊匹配对应的值
@@ -33,6 +42,16 @@ func newContext(w http.ResponseWriter, req *http.Request) *Context {
 		writer: w,
 		Method: req.Method,
 		Path:   req.URL.Path,
+		index:  -1,
+	}
+}
+
+// Next 中间件相关的Next方法
+func (c *Context) Next() {
+	c.index++
+	s := len(c.handlers)
+	for ; c.index < s; c.index++ {
+		c.handlers[c.index](c)
 	}
 }
 
