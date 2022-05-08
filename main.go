@@ -1,12 +1,15 @@
 package main
 
-import (
-	"gproject/great"
-	"log"
-	"net/http"
-	"time"
-)
+import "gproject/great"
 
+// 模板测试
+func main() {
+	r := great.New()
+	r.Static("/assets", "/usr/geektutu/blog/static")
+	r.Run(":9999")
+}
+
+/*
 // 中间件测试
 func onlyForV2() great.HandlerFunc {
 	return func(c *great.Context) {
@@ -37,6 +40,7 @@ func main() {
 
 	r.Run(":9999")
 }
+*/
 
 /*
 //分组测试

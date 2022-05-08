@@ -3,6 +3,7 @@ package great
 import (
 	"log"
 	"net/http"
+	"path"
 	"strings"
 )
 
@@ -111,4 +112,30 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // Use 使用中间件
 func (group *RouterGroup) Use(middlewares ...HandlerFunc) {
 	group.middlewares = append(group.middlewares, middlewares...)
+}
+
+//  创建静态资源处理器
+// 支持静态服务资源  FileSystem接口实现了对一系列命名文件的访问
+func (group *RouterGroup) createStaticHandler(relativePath string, fs http.FileSystem) HandlerFunc {
+	// 先找到绝对路径
+	absolutePath := group.prefix + relativePath
+	// 根据路径和FileSystem生成文件服务器
+	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+	return func(context *Context) {
+		//  获取文件路径
+		file := context.Param("filepath")
+		//  尝试打开文件  看文件是否存在
+		if _, err := fs.Open(file); err != nil {
+			context.Status(http.StatusNotFound)
+			return
+		}
+		// 文件服务器接手处理请求
+		fileServer.ServeHTTP(context.writer, context.Req)
+	}
+}
+
+func (group *RouterGroup) Static(relativePath string, root string) {
+	handler := group.createStaticHandler(relativePath, http.Dir(root))
+	urlPattern := path.Join(relativePath, "/*filepath")
+	group.GET(urlPattern, handler)
 }
