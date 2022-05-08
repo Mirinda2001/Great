@@ -101,6 +101,21 @@ func (engine *Engine) Run(addr string) (err error) {
 	return http.ListenAndServe(addr, engine)
 }
 
+// Default 默认使用Logger和Recovery中间件
+func Default() *Engine {
+	engine := New()
+	engine.Use(Logger(), Recovery())
+	return engine
+}
+
+/*
+错误写法
+func (engine *Engine) Default() {
+	engine.Use(Logger(), Recovery())
+	engine.Run(":9999")
+}
+*/
+
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	var middlewares []HandlerFunc
 	for _, group := range engine.groups {

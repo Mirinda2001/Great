@@ -5,6 +5,21 @@ import (
 	"net/http"
 )
 
+func main() {
+	r := great.Default()
+	r.GET("/", func(c *great.Context) {
+		c.String(http.StatusOK, "Hello Geektutu\n")
+	})
+	// index out of range for testing Recovery()
+	r.GET("/panic", func(c *great.Context) {
+		names := []string{"geektutu"}
+		c.String(http.StatusOK, names[100])
+	})
+
+	r.Run(":9999")
+}
+
+/*
 // HTML 功能测试
 func main() {
 	r := great.New()
@@ -16,6 +31,7 @@ func main() {
 	})
 	r.Run(":9999")
 }
+*/
 
 /*
 // 模板测试
