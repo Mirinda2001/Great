@@ -23,6 +23,8 @@ type Context struct {
 	handlers []HandlerFunc
 	// 记录执行到第几个中间件
 	index int
+	// 新增engine   与HTML相关
+	engine *Engine
 }
 
 func (c *Context) Fail(code int, err string) {
@@ -99,9 +101,21 @@ func (c *Context) Data(code int, data []byte) {
 	c.writer.Write(data)
 }
 
+/*
 func (c *Context) HTML(code int, HTML string) {
 	c.SetHeader("Content-Type", "text/html")
 	c.Status(code)
 	//c.StatusCode = code
 	c.writer.Write([]byte(HTML))
+}
+
+*/
+
+// HTML 对原来的 (*Context).HTML()方法做了些小修改，使之支持根据模板文件名选择模板进行渲染。
+func (c *Context) HTML(code int, name string, data interface{}) {
+	c.SetHeader("Content-Type", "text/html")
+	c.Status(code)
+	if err := c.engine.htmlTemplates.ExecuteTemplate(c.writer, name, data); err != nil {
+		c.Fail(500, err.Error())
+	}
 }

@@ -1,13 +1,30 @@
 package main
 
-import "gproject/great"
+import (
+	"gproject/great"
+	"net/http"
+)
 
+// HTML 功能测试
+func main() {
+	r := great.New()
+	r.LoadHTMLGlob("templates/*")
+	r.Static("/assets", "./static")
+
+	r.GET("/", func(c *great.Context) {
+		c.HTML(http.StatusOK, "css.tmpl", nil)
+	})
+	r.Run(":9999")
+}
+
+/*
 // 模板测试
 func main() {
 	r := great.New()
 	r.Static("/assets", "/usr/geektutu/blog/static")
 	r.Run(":9999")
 }
+*/
 
 /*
 // 中间件测试

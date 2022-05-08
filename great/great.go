@@ -1,6 +1,7 @@
 package great
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"path"
@@ -22,8 +23,19 @@ type (
 		*RouterGroup // 为了让engine具有RouterGroup的功能
 		router       *router
 		groups       []*RouterGroup
+		//前者将所有的模板加载进内存，后者是所有的自定义模板渲染函数。
+		htmlTemplates *template.Template
+		funcMap       template.FuncMap
 	}
 )
+
+// SetFuncMap 新增的和HTML有关的方法
+func (engine *Engine) SetFuncMap(funcMap template.FuncMap) {
+	engine.funcMap = funcMap
+}
+func (engine *Engine) LoadHTMLGlob(pattern string) {
+	engine.htmlTemplates = template.Must(template.New("").Funcs(engine.funcMap).ParseGlob(pattern))
+}
 
 // Engine 里的router属性是一个路径对应一对请求响应
 /*
@@ -98,6 +110,7 @@ func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	c := newContext(w, req)
 	c.handlers = middlewares
+	c.engine = engine
 	engine.router.handle(c)
 }
 
